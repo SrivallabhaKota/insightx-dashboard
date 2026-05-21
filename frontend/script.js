@@ -202,11 +202,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
             const result = await res.json();
-            showToast(result.message);
-            uploadModal.style.display = 'none';
-            fetchDashboardData();
+            if (res.ok) {
+                showToast(result.message);
+                uploadModal.style.display = 'none';
+                fetchDashboardData();
+            } else {
+                showToast(result.detail || 'Upload failed', 'error');
+            }
         } catch (error) {
-            showToast('Upload failed', 'error');
+            console.error('Upload error:', error);
+            showToast('Network error during upload', 'error');
         }
     });
 

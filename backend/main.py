@@ -43,26 +43,22 @@ async def upload_data(file: UploadFile = File(...), db: Session = Depends(databa
         else:
             raise HTTPException(status_code=400, detail="Invalid file type")
         
+        # Clean up column names (strip spaces, lowercase for comparison)
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        
         # Replace NaN with appropriate defaults
-        df = df.fillna({
-            'Product': 'Unknown', 'product': 'Unknown',
-            'Category': 'Misc', 'category': 'Misc',
-            'Revenue': 0, 'revenue': 0,
-            'Profit': 0, 'profit': 0,
-            'Quantity': 0, 'quantity': 0,
-            'Region': 'Global', 'region': 'Global',
-            'Date': '2024-01-01', 'date': '2024-01-01'
-        })
+        df = df.fillna(0)
         
         for _, row in df.iterrows():
+            # Get values using lowercase keys, providing fallback keys
             db_sales = models.SalesData(
-                product=str(row.get('Product', row.get('product', 'Unknown'))),
-                category=str(row.get('Category', row.get('category', 'Misc'))),
-                revenue=float(row.get('Revenue', row.get('revenue', 0))),
-                profit=float(row.get('Profit', row.get('profit', 0))),
-                quantity=int(row.get('Quantity', row.get('quantity', 0))),
-                region=str(row.get('Region', row.get('region', 'Global'))),
-                date=str(row.get('Date', row.get('date', '2024-01-01')))
+                product=str(row.get('product', 'Unknown')),
+                category=str(row.get('category', 'Misc')),
+                revenue=float(row.get('revenue', 0)),
+                profit=float(row.get('profit', 0)),
+                quantity=int(row.get('quantity', 0)),
+                region=str(row.get('region', 'Global')),
+                date=str(row.get('date', '2024-01-01'))
             )
             db.add(db_sales)
         db.commit()
