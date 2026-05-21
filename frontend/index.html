@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightX AI Sales & Revenue Analytics Dashboard</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html2pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Handsontable -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+</head>
+<body class="dark-neon">
+    <div id="particles-js"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-brain neon-text"></i>
+                <span class="logo-text">InsightX AI</span>
+            </div>
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="active" data-section="dashboard"><i class="fas fa-th-large"></i> <span>Dashboard</span></li>
+                <li data-section="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></li>
+                <li data-section="reports"><i class="fas fa-file-invoice"></i> <span>Reports</span></li>
+                <li data-section="calendar"><i class="fas fa-calendar-alt"></i> <span>Calendar</span></li>
+                <li data-section="ai-insights"><i class="fas fa-robot"></i> <span>AI Insights</span></li>
+                <li data-section="upload"><i class="fas fa-cloud-upload-alt"></i> <span>Upload Data</span></li>
+                <li data-section="settings"><i class="fas fa-cog"></i> <span>Settings</span></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Top Navbar -->
+        <header class="navbar">
+            <div class="navbar-left">
+                <h1 class="project-title">InsightX AI Sales & Revenue Analytics Dashboard</h1>
+            </div>
+            <div class="navbar-right">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search analytics...">
+                </div>
+                <div class="nav-icons">
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="theme-toggle" id="theme-toggle">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" alt="User">
+                        <div class="real-time-clock" id="clock">00:00:00</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2 class="animate-text">Welcome to InsightX AI Dashboard</h2>
+                <p>Monitor sales, revenue, analytics, and business insights in real time.</p>
+                <div class="hero-btns">
+                    <button class="btn btn-primary ripple" id="btn-upload"><i class="fas fa-upload"></i> Upload Data</button>
+                    <button class="btn btn-secondary ripple" id="btn-generate-report"><i class="fas fa-file-export"></i> Generate Report</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-cube"></div>
+            </div>
+        </section>
+
+        <!-- KPI Cards -->
+        <section class="kpi-grid">
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Revenue</h3>
+                    <div class="kpi-value" id="kpi-revenue">$0</div>
+                    <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                </div>
+            </div>
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Sales</h3>
+                    <div class="kpi-value" id="kpi-sales">0</div>
+                    <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> 8.2%</span>
+                </div>
+            </div>
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-box"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Orders</h3>
+                    <div class="kpi-value" id="kpi-orders">0</div>
+                    <span class="kpi-trend negative"><i class="fas fa-arrow-down"></i> 1.4%</span>
+                </div>
+            </div>
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-chart-pie"></i></div>
+                <div class="kpi-info">
+                    <h3>Total Profit</h3>
+                    <div class="kpi-value" id="kpi-profit">$0</div>
+                    <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> 15.1%</span>
+                </div>
+            </div>
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-star"></i></div>
+                <div class="kpi-info">
+                    <h3>Top Product</h3>
+                    <div class="kpi-value small-text" id="kpi-top-product">N/A</div>
+                    <span class="kpi-label">Best Selling</span>
+                </div>
+            </div>
+            <div class="kpi-card glass floating">
+                <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+                <div class="kpi-info">
+                    <h3>Monthly Growth</h3>
+                    <div class="kpi-value" id="kpi-growth">0%</div>
+                    <span class="kpi-trend positive"><i class="fas fa-arrow-up"></i> 2.3%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Grid -->
+        <section class="charts-grid">
+            <div class="chart-container glass">
+                <h3>Revenue Trend</h3>
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+            <div class="chart-container glass">
+                <h3>Category Distribution</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-container glass">
+                <h3>Monthly Sales</h3>
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
+            <div class="chart-container glass">
+                <h3>Profit Analytics</h3>
+                <canvas id="profitChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Data Management Section -->
+        <section class="data-section">
+            <div class="section-header">
+                <h2>Sales Data Management</h2>
+                <div class="actions">
+                    <button class="btn btn-primary ripple" id="add-manual-data"><i class="fas fa-plus"></i> Add Manual Data</button>
+                    <button class="btn btn-outline ripple" id="export-csv"><i class="fas fa-file-csv"></i> Export CSV</button>
+                </div>
+            </div>
+            
+            <div class="table-container glass">
+                <div class="table-controls">
+                    <input type="text" id="table-search" placeholder="Search products, regions...">
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="filter-region">
+                        <option value="">All Regions</option>
+                    </select>
+                </div>
+                <table id="sales-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Revenue</th>
+                            <th>Profit</th>
+                            <th>Quantity</th>
+                            <th>Region</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- AI Insights Panel -->
+        <section class="ai-insights-panel glass">
+            <div class="ai-header">
+                <i class="fas fa-robot ai-glow"></i>
+                <h2>AI Smart Insights</h2>
+            </div>
+            <div class="insights-content" id="insights-container">
+                <div class="typing-effect">Analyzing sales data and generating insights...</div>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section class="calendar-section glass">
+            <h3>Sales Activity Heatmap</h3>
+            <div id="calendar-heatmap">
+                <!-- Heatmap implementation -->
+                <div class="heatmap-placeholder">Heatmap Loading...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating AI Chat -->
+    <div class="ai-chat-widget" id="ai-chat">
+        <div class="chat-header">
+            <i class="fas fa-robot"></i>
+            <span>InsightX AI Assistant</span>
+            <button class="chat-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="chat-body" id="chat-messages">
+            <div class="message ai">Hello! I'm InsightX AI. How can I help you with your sales data today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Ask about sales, top products...">
+            <button id="send-chat"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <button class="chat-toggle ripple" id="chat-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="upload-modal">
+        <div class="modal-content glass">
+            <span class="close-modal">&times;</span>
+            <h2>Upload Sales Data</h2>
+            <div class="upload-area" id="drop-zone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & Drop CSV or Excel files here</p>
+                <span>or</span>
+                <input type="file" id="file-input" hidden accept=".csv,.xlsx,.xls">
+                <button class="btn btn-primary ripple" onclick="document.getElementById('file-input').click()">Browse Files</button>
+            </div>
+            <div class="upload-progress" style="display: none;">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spreadsheet Modal -->
+    <div class="modal" id="spreadsheet-modal">
+        <div class="modal-content glass spreadsheet-modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Manual Data Entry</h2>
+            <div id="spreadsheet-container"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary ripple" id="save-spreadsheet">Save to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
