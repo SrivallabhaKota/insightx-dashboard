@@ -33,27 +33,43 @@ def create_sales(sales: schemas.SalesCreate, db: Session = Depends(database.get_
 
 @app.post("/api/upload")
 async def upload_data(file: UploadFile = File(...), db: Session = Depends(database.get_db)):
-    contents = await file.read()
-    if file.filename.endswith('.csv'):
-        df = pd.read_csv(io.BytesIO(contents))
-    elif file.filename.endswith(('.xls', '.xlsx')):
-        df = pd.read_excel(io.BytesIO(contents))
-    else:
-        raise HTTPException(status_code=400, detail="Invalid file type")
-    
-    for _, row in df.iterrows():
-        db_sales = models.SalesData(
-            product=row.get('Product', row.get('product')),
-            category=row.get('Category', row.get('category')),
-            revenue=float(row.get('Revenue', row.get('revenue', 0))),
-            profit=float(row.get('Profit', row.get('profit', 0))),
-            quantity=int(row.get('Quantity', row.get('quantity', 0))),
-            region=row.get('Region', row.get('region')),
-            date=str(row.get('Date', row.get('date')))
-        )
-        db.add(db_sales)
-    db.commit()
-    return {"message": "Data uploaded successfully", "rows": len(df)}
+    try:
+        contents = await file.read()
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        elif file.filename.endswith(('.xls', '.xlsx')):
+            # Explicitly use openpyxl for xlsx
+            df = pd.read_excel(io.BytesIO(contents), engine='openpyxl' if file.filename.endswith('.xlsx') else None)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid file type")
+        
+        # Replace NaN with appropriate defaults
+        df = df.fillna({
+            'Product': 'Unknown', 'product': 'Unknown',
+            'Category': 'Misc', 'category': 'Misc',
+            'Revenue': 0, 'revenue': 0,
+            'Profit': 0, 'profit': 0,
+            'Quantity': 0, 'quantity': 0,
+            'Region': 'Global', 'region': 'Global',
+            'Date': '2024-01-01', 'date': '2024-01-01'
+        })
+        
+        for _, row in df.iterrows():
+            db_sales = models.SalesData(
+                product=str(row.get('Product', row.get('product', 'Unknown'))),
+                category=str(row.get('Category', row.get('category', 'Misc'))),
+                revenue=float(row.get('Revenue', row.get('revenue', 0))),
+                profit=float(row.get('Profit', row.get('profit', 0))),
+                quantity=int(row.get('Quantity', row.get('quantity', 0))),
+                region=str(row.get('Region', row.get('region', 'Global'))),
+                date=str(row.get('Date', row.get('date', '2024-01-01')))
+            )
+            db.add(db_sales)
+        db.commit()
+        return {"message": "Data uploaded successfully", "rows": len(df)}
+    except Exception as e:
+        print(f"Upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
 
 @app.get("/api/dashboard-summary", response_model=schemas.DashboardSummary)
 def get_summary(db: Session = Depends(database.get_db)):
