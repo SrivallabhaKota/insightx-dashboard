@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Constants
-    const API_URL = 'http://localhost:8000/api';
+    const API_URL = 'https://salesandrevenue.onrender.com/api';
     let salesData = [];
     let charts = {};
 
